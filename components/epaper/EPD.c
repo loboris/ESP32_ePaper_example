@@ -1,4 +1,4 @@
-/* EPD module
+/* EPD library
  *
  *  Author: LoBo (loboris@gmail.com, loboris.github)
  *
@@ -2234,10 +2234,9 @@ static UINT tjd_output (
 	return 1;	// Continue to decompression
 }
 
-// tft.jpgimage(X, Y, scale, file_name, buf, size]
 // X & Y can be < 0 !
 //=================================================================================
-int TFT_jpg_image(int x, int y, uint8_t scale, char *fname, uint8_t *buf, int size)
+int EPD_jpg_image(int x, int y, uint8_t scale, char *fname, uint8_t *buf, int size)
 {
 	JPGIODEV dev;
     struct stat sb;

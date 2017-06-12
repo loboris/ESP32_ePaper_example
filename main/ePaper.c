@@ -1,10 +1,6 @@
-/* TFT demo
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
+/* ePaper demo
+ *
+ *  Author: LoBo (loboris@gmail.com, loboris.github)
 */
 
 #include <time.h>
@@ -45,7 +41,7 @@
 #include "img3.h"
 #include "img_hacking.c"
 #include "EPD.h"
-#include "EPDspi.h"
+//#include "EPDspi.h"
 
 #define DELAYTIME 1500
 
@@ -181,25 +177,28 @@ void app_main()
 	gpio_set_level(DC_Pin, 1);
 	gpio_set_direction(RST_Pin, GPIO_MODE_OUTPUT);
 	gpio_set_level(RST_Pin, 0);
-	gpio_set_direction(MISO_Pin, GPIO_MODE_INPUT);
-    gpio_set_pull_mode(MISO_Pin, GPIO_PULLUP_ONLY);
 	gpio_set_direction(BUSY_Pin, GPIO_MODE_INPUT);
     gpio_set_pull_mode(BUSY_Pin, GPIO_PULLUP_ONLY);
 
+#if POWER_Pin
+	gpio_set_direction(POWER_Pin, GPIO_MODE_OUTPUT);
+	gpio_set_level(POWER_Pin, 1);
+#endif
+
     spi_lobo_bus_config_t buscfg={
-        .miso_io_num = -1, //MISO_Pin,				// set SPI MISO pin
-        .mosi_io_num = MOSI_Pin,				// set SPI MOSI pin
-        .sclk_io_num = SCK_Pin,					// set SPI CLK pin
+        .miso_io_num = -1,				// set SPI MISO pin
+        .mosi_io_num = MOSI_Pin,		// set SPI MOSI pin
+        .sclk_io_num = SCK_Pin,			// set SPI CLK pin
         .quadwp_io_num=-1,
         .quadhd_io_num=-1,
-		.max_transfer_sz = 6*1024,
+		.max_transfer_sz = 5*1024,		// max transfer size is 4736 bytes
     };
     spi_lobo_device_interface_config_t devcfg={
-        .clock_speed_hz=40000000,               // Initial clock out at 20 MHz
-        .mode=0,                                // SPI mode 0
-        .spics_io_num=-1,						// we will use external CS pin
-		.spics_ext_io_num = CS_Pin,				// external CS pin
-		.flags=SPI_DEVICE_HALFDUPLEX,           // ALWAYS SET  to HALF DUPLEX MODE!! for display spi
+        .clock_speed_hz=40000000,		// SPI clock is 40 MHz
+        .mode=0,						// SPI mode 0
+        .spics_io_num=-1,				// we will use external CS pin
+		.spics_ext_io_num = CS_Pin,		// external CS pin
+		.flags=SPI_DEVICE_HALFDUPLEX,	// ALWAYS SET  to HALF DUPLEX MODE for display spi !!
     };
 
     // ====================================================================================================================
@@ -207,11 +206,11 @@ void app_main()
 
 	vTaskDelay(500 / portTICK_RATE_MS);
 	printf("\r\n=================================\r\n");
-    printf("ePaper display DEMO, LoBo 05/2017\r\n");
+    printf("ePaper display DEMO, LoBo 06/2017\r\n");
 	printf("=================================\r\n\r\n");
 
 	// ==================================================================
-	// ==== Initialize the SPI bus and attach the LCD to the SPI bus ====
+	// ==== Initialize the SPI bus and attach the EPD to the SPI bus ====
 
 	ret=spi_lobo_bus_add_device(SPI_BUS, &buscfg, &devcfg, &disp_spi);
     assert(ret==ESP_OK);
@@ -231,15 +230,18 @@ void app_main()
 	printf("-------------------\r\n");
 
 
+	EPD_DisplayClearFull();
+
 #ifdef CONFIG_EXAMPLE_USE_WIFI
 
-	EPD_DisplayClearFull();
 	EPD_DisplayClearPart();
 	EPD_fillScreen(_bg);
 	EPD_setFont(DEFAULT_FONT, NULL);
 	sprintf(tmp_buff, "Waiting for NTP time...");
 	EPD_print(tmp_buff, CENTER, CENTER);
-	EPD_DisplayPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, disp_buffer);
+	EPD_drawRect(10,10,274,108, EPD_BLACK);
+	EPD_drawRect(12,12,270,104, EPD_BLACK);
+	EPD_UpdateScreen();
 
 	// ===== Set time zone ======
 	setenv("TZ", "CET-1CEST", 0);
@@ -274,6 +276,7 @@ void app_main()
     // Run demo
     //=========
 
+	/*
 	EPD_DisplayClearFull();
     EPD_DisplayClearPart();
 	EPD_fillScreen(_bg);
@@ -281,7 +284,6 @@ void app_main()
 	//EPD_DisplaySetPart(0xFF);
 
 
-	/*
     uint8_t LUTTest1[31]	= {0x32, 0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 0x0F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
     uint8_t LUTTest2[31]	= {0x32, 0x28,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 0x0F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 	_gs = 0;
@@ -379,7 +381,7 @@ void app_main()
 
 	_gs = 1;
 	uint32_t tstart;
-	int pass = 0, ftype = 7;
+	int pass = 0, ftype = 9;
     while (1) {
     	ftype++;
     	if (ftype > 10) {
@@ -395,8 +397,6 @@ void app_main()
     	}
     	printf("\r\n-- Test %d\r\n", ftype);
     	EPD_DisplayClearPart();
-		EPD_DisplaySetPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, 0x00);
-		EPD_DisplaySetPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, 0xFF);
 
     	//EPD_Cls(0);
 		EPD_fillScreen(_bg);
@@ -436,7 +436,7 @@ void app_main()
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d", pass+1);
 			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
-			EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
+			EPD_UpdateScreen();
 		}
 		else if (ftype == 2) {
 			orientation = LANDSCAPE_180;
@@ -454,7 +454,7 @@ void app_main()
 			sprintf(tmp_buff, "Pass: %d (rotated 180)", pass+1);
 			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
 			orientation = LANDSCAPE_0;
-			EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
+			EPD_UpdateScreen();
 		}
 		else if (ftype == 3) {
 			for (int f=0; f<3; f++) {
@@ -471,7 +471,7 @@ void app_main()
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d (Fonts from file)", pass+1);
 			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
-			EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
+			EPD_UpdateScreen();
 		}
 		else if (ftype == 4) {
 			y = 16;
@@ -500,7 +500,7 @@ void app_main()
 						EPD_print(tmp_buff, CENTER, y2);
 						_fg = 15;
 					}
-					EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
+					EPD_UpdateScreen();
 				}
 				EPD_wait(100);
 			}
@@ -513,7 +513,7 @@ void app_main()
 			font_rotate = 0;
 			sprintf(tmp_buff, "Pass: %d", pass+1);
 			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
-			EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
+			EPD_UpdateScreen();
 		}
 		else if (ftype == 5) {
 			uint8_t old_gs = _gs;
@@ -567,7 +567,7 @@ void app_main()
 			EPD_print(tmp_buff, _width/2, 4);
 			font_rotate = 0;
 
-			EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
+			EPD_UpdateScreen();
 			_gs = old_gs;
 		}
 		else if (ftype == 6) {
@@ -579,7 +579,7 @@ void app_main()
 			sprintf(tmp_buff, "Pass: %d", pass+1);
 			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
 
-			EPD_DisplayPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, disp_buffer);
+			EPD_UpdateScreen();
 			_gs = old_gs;
 		}
 		else if (ftype == 7) {
@@ -593,7 +593,7 @@ void app_main()
 			sprintf(tmp_buff, "Pass: %d", pass+1);
 			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
 
-			EPD_DisplayPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, disp_buffer);
+			EPD_UpdateScreen();
 			_fg = 15;
 			_bg = 0;
 			_gs = old_gs;
@@ -620,7 +620,7 @@ void app_main()
 			sprintf(tmp_buff, "Pass: %d (Gray scale image)", pass+1);
 			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
 
-			EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
+			EPD_UpdateScreen();
 			_gs = old_gs;
 		}
 		else if (ftype == 9) {
@@ -632,23 +632,43 @@ void app_main()
 			sprintf(tmp_buff, "Pass: %d", pass+1);
 			EPD_print(tmp_buff, 4, 4);
 
-			EPD_DisplayPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, disp_buffer);
+			EPD_UpdateScreen();
 			_gs = old_gs;
 		}
 		else if (ftype == 10) {
 			if (spiffs_is_mounted) {
 				// ** Show scaled (1/8, 1/4, 1/2 size) JPG images
-				if (TFT_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test1b.jpg", NULL, 0) == 0) {
 					uint8_t old_gs = _gs;
 					_gs = 1;
+					EPD_jpg_image(0, 0, 1, SPIFFS_BASE_PATH"/images/test1.jpg", NULL, 0);
+					EPD_jpg_image(_width/2, 0, 1, SPIFFS_BASE_PATH"/images/test2.jpg", NULL, 0);
+					EPD_jpg_image(0, _height/2, 1, SPIFFS_BASE_PATH"/images/test3.jpg", NULL, 0);
+					EPD_jpg_image(_width/2, _height/2, 1, SPIFFS_BASE_PATH"/images/test4.jpg", NULL, 0);
+					EPD_UpdateScreen();
+					EPD_wait(4000);
 
-					EPD_setFont(DEFAULT_FONT, NULL);
-					sprintf(tmp_buff, " Jpeg image ");
-					EPD_print(tmp_buff, RIGHT, 128-EPD_getfontheight()-2);
+					EPD_Cls();
+					EPD_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test2.jpg", NULL, 0);
+					EPD_UpdateScreen();
+					EPD_wait(3000);
 
-					EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
+					EPD_Cls();
+					EPD_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test3.jpg", NULL, 0);
+					EPD_UpdateScreen();
+					EPD_wait(3000);
+
+					EPD_Cls();
+					EPD_fillScreen(_bg);
+					EPD_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test4.jpg", NULL, 0);
+					EPD_UpdateScreen();
+					EPD_wait(3000);
+
+					EPD_Cls();
+					EPD_fillScreen(_bg);
+					EPD_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test1.jpg", NULL, 0);
+					EPD_UpdateScreen();
+
 					_gs = old_gs;
-				}
 			}
 		}
 
@@ -656,6 +676,8 @@ void app_main()
 		tstart = clock() - tstart;
 		pass++;
     	printf("-- Type: %d Pass: %d Time: %u ms\r\n", ftype, pass, tstart);
+
+    	EPD_PowerOff();
 		EPD_wait(8000);
     }
 

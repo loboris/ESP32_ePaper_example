@@ -1,3 +1,14 @@
+/*
+ *  Author: LoBo (loboris@gmail.com, loboris.github)
+ *
+ *  Module supporting SPI ePaper displays
+ *
+ * HIGH SPEED LOW LEVEL DISPLAY FUNCTIONS
+ * USING DIRECT or DMA SPI TRANSFER MODEs
+ *
+*/
+
+
 #ifndef _EPDSPI_H_
 #define _EPDSPI_H_
 
@@ -9,11 +20,14 @@
 
 #define SCK_Pin		18
 #define MOSI_Pin	23
-#define MISO_Pin	19
+//#define MISO_Pin	19
 #define DC_Pin		26
 #define BUSY_Pin	32
 #define RST_Pin		27
 #define CS_Pin		5
+// ePaper display can be powered from GPIO
+// if powered directly from Vcc, set this to 0
+#define POWER_Pin	22
 
 #define DC_VAL (1 << DC_Pin)
 
@@ -63,7 +77,10 @@ void EPD_DisplayFull(uint8_t *DisBuffer);
 void EPD_DisplayPart(int xStart, int xEnd, uint8_t yStart, uint8_t yEnd, uint8_t *DisBuffer);
 void EPD_gsUpdate(int xStart, int xEnd, uint8_t yStart, uint8_t yEnd, uint8_t gs);
 void EPD_Update(int xStart, int xEnd, uint8_t yStart, uint8_t yEnd);
-void EPD_Cls(uint8_t bl);
+void EPD_UpdateScreen();
+void EPD_Cls();
+void EPD_PowerOn();
+void EPD_PowerOff();
 
 
 #endif

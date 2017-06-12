@@ -8,6 +8,7 @@
 #define _EPD_H_
 
 #include <stdlib.h>
+#include "EPDspi.h"
 
 typedef uint8_t color_t;
 
@@ -547,6 +548,24 @@ int compile_font_file(char *fontfile, uint8_t dbg);
  */
 void getFontCharacters(uint8_t *buf);
 
-int TFT_jpg_image(int x, int y, uint8_t scale, char *fname, uint8_t *buf, int size);
+/*
+ * Decodes and displays JPG image. RGB colors are converted to 4-bit Gray scale
+ * Limits:
+ * 		Baseline only. Progressive and Lossless JPEG format are not supported.
+ *		Image size: Up to 65520 x 65520 pixels
+ *		Color space: YCbCr three components only. Gray scale image is not supported.
+ *		Sampling factor: 4:4:4, 4:2:2 or 4:2:0.
+ *
+ * Params:
+ *       x: image left position; constants CENTER & RIGHT can be used; negative value is accepted
+ *       y: image top position;  constants CENTER & BOTTOM can be used; negative value is accepted
+ *   scale: image scale factor: 0~3; if scale>0, image is scaled by factor 1/(2^scale) (1/2, 1/4 or 1/8)
+ *   fname: pointer to the name of the file from which the image will be read
+ *   		if set to NULL, image will be read from memory buffer pointed to by 'buf'
+ *     buf: pointer to the memory buffer from which the image will be read; used if fname=NULL
+ *    size: size of the memory buffer from which the image will be read; used if fname=NULL & buf!=NULL
+ *
+ */
+int EPD_jpg_image(int x, int y, uint8_t scale, char *fname, uint8_t *buf, int size);
 
 #endif

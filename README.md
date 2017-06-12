@@ -164,3 +164,5 @@ to create **spiffs image** in *build* directory and **flash** it to ESP32
 
 ---
 
+![Tested on](https://raw.githubusercontent.com/loboris/ESP32_ePaper_example/master/Documents/2.9inch-e-paper-module-4.jpg)
+

@@ -1,4 +1,12 @@
-
+/*
+ *  Author: LoBo (loboris@gmail.com, loboris.github)
+ *
+ *  Module supporting SPI ePaper displays
+ *
+ * HIGH SPEED LOW LEVEL DISPLAY FUNCTIONS
+ * USING DIRECT or DMA SPI TRANSFER MODEs
+ *
+*/
 
 
 #include "spi_master_lobo.h"
@@ -217,13 +225,44 @@ static void EPD_WriteCMD_p1(uint8_t command,uint8_t para)
 	spi_lobo_device_deselect(disp_spi);
 }
 
-//-----------------------
-static void EPD_POWERON()
+//----------------
+void EPD_PowerOn()
 {
 	EPD_WriteCMD_p1(0x22,0xc0);
 	EPD_WriteCMD(0x20);
 	//EPD_WriteCMD(0xff);
 	spi_lobo_device_deselect(disp_spi);
+#if EPD_DEBUG
+	if (!WaitBusy()) printf("[EPD] NOT BUSY\r\n");
+	if (!ReadBusy()) printf("[EPD] NOT READY\r\n");
+#else
+	WaitBusy();
+	ReadBusy();
+#endif
+}
+
+//-----------------
+void EPD_PowerOff()
+{
+	EPD_WriteCMD_p1(0x22,0x03);
+	EPD_WriteCMD(0x20);
+	//EPD_WriteCMD(0xff);
+	spi_lobo_device_deselect(disp_spi);
+#if EPD_DEBUG
+	if (!WaitBusy()) printf("[EPD] NOT BUSY\r\n");
+	if (!ReadBusy()) printf("[EPD] NOT READY\r\n");
+#else
+	WaitBusy();
+	ReadBusy();
+#endif
+#if POWER_Pin
+	gpio_set_level(DC_Pin, 0);
+	gpio_set_level(MOSI_Pin, 0);
+	gpio_set_level(SCK_Pin, 0);
+	gpio_set_level(RST_Pin, 0);
+	gpio_set_level(CS_Pin, 0);
+	gpio_set_level(POWER_Pin, 0);
+#endif
 }
 
 // Send command with multiple parameters
@@ -357,8 +396,13 @@ static void part_display(uint8_t RAM_XST, uint8_t RAM_XEND ,uint16_t RAM_YST, ui
 //--------------------
 static void EPD_Init()
 {
-	// reset
+#if POWER_Pin
+	gpio_set_level(POWER_Pin, 1);
+	vTaskDelay(100 / portTICK_RATE_MS);
+#else
 	vTaskDelay(10 / portTICK_RATE_MS);
+#endif
+	// reset
 	EPD_RST_0;
 	vTaskDelay(10 / portTICK_RATE_MS);
 #if EPD_DEBUG
@@ -453,7 +497,7 @@ static void EPD_init_Full(void)
 	EPD_Init();			// Reset and set register
 	EPD_Write((uint8_t *)LUTDefault_full,sizeof(LUTDefault_full));
 
-	EPD_POWERON();
+	EPD_PowerOn();
 }
 
 /*******************************************************************************
@@ -463,7 +507,7 @@ static void EPD_init_Part(void)
 {
 	EPD_Init();			// display
 	EPD_Write((uint8_t *)LUT_part, 31);
-	EPD_POWERON();
+	EPD_PowerOn();
 }
 /********************************************************************************
 parameter:
@@ -555,9 +599,17 @@ void EPD_DisplayClearPart()
 #if EPD_DEBUG
 	uint32_t t1 = clock();
 	EPD_Dis_Part(0, xDot-1, 0, yDot-1, &m, 0);	//all white
+	m = 0x00;
+	EPD_Dis_Part(0, xDot-1, 0, yDot-1, &m, 0);	//all black
+	m = 0xFF;
+	EPD_Dis_Part(0, xDot-1, 0, yDot-1, &m, 0);	//all white
 	t1 = clock() - t1;
 	printf("[EPD] Part Clear: %u ms\r\n", t1);
 #else
+	EPD_Dis_Part(0, xDot-1, 0, yDot-1, &m, 0);	//all white
+	m = 0x00;
+	EPD_Dis_Part(0, xDot-1, 0, yDot-1, &m, 0);	//all black
+	m = 0xFF;
 	EPD_Dis_Part(0, xDot-1, 0, yDot-1, &m, 0);	//all white
 #endif
 }
@@ -618,22 +670,13 @@ void EPD_DisplayPart(int xStart, int xEnd, uint8_t yStart, uint8_t yEnd, uint8_t
 #endif
 }
 
-//======================
-void EPD_Cls(uint8_t bl)
+//============
+void EPD_Cls()
 {
-	LUT_part = LUT_gs;
-	if (bl) {
-		LUT_gs[21] = 15;
-		LUT_gs[1] = 0x18;
-		memset(disp_buffer, 0, _width * (_height/8));
-		EPD_DisplayPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, disp_buffer); // Black
-	}
-	LUT_gs[21] = 15;
-	LUT_gs[1] = 0x28;
+	EPD_DisplaySetPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, 0xFF);
 	memset(disp_buffer, 0xFF, _width * (_height/8));
-	EPD_DisplayPart(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1, disp_buffer); // White
-	LUT_gs[1] = 0x18;
-	LUT_part = LUTDefault_part;
+	memset(gs_disp_buffer, 0, _width * _height);
+	gs_used_shades = 0;
 }
 
 //-------------------------------------------------------------------------------
@@ -694,6 +737,12 @@ void EPD_Update(int xStart, int xEnd, uint8_t yStart, uint8_t yEnd)
 			if (gs_used_shades & (1<<n)) EPD_gsUpdate(xStart, xEnd, yStart, yEnd, n);
 		}
 	}
+}
+
+//-------------------
+void EPD_UpdateScreen()
+{
+	EPD_Update(0, EPD_DISPLAY_WIDTH-1, 0, EPD_DISPLAY_HEIGHT-1);
 }
 
 //------------------------
