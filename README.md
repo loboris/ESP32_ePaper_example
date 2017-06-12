@@ -107,6 +107,7 @@ To run the demo, attach display module to ESP32. Default pins used are:
 *  RST: 27 (display RESET)
 * BUSY: 32 (display BUSY output)
 
+The display can be powered from 3.3V or from **GPIO pin**. See *EPDspi.h* for configuration options.
 
 **If you want to use different pins, change them in** *EPDspi.h*
 
@@ -164,5 +165,6 @@ to create **spiffs image** in *build* directory and **flash** it to ESP32
 
 ---
 
+Tested on Waveshare 2.9" ePaper module connected to SparkFun ESP32 Thing board.
 ![Tested on](https://raw.githubusercontent.com/loboris/ESP32_ePaper_example/master/Documents/2.9inch-e-paper-module-4.jpg)
 

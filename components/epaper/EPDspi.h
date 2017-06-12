@@ -27,7 +27,7 @@
 #define CS_Pin		5
 // ePaper display can be powered from GPIO
 // if powered directly from Vcc, set this to 0
-#define POWER_Pin	22
+#define POWER_Pin	0
 
 #define DC_VAL (1 << DC_Pin)
 
