@@ -141,13 +141,13 @@ Make and flash the example.
 
 *The demo uses some image and font files and it is necessary to flash the spiffs image*
 
-**To flash already prepared image to flash** execute:
+**To flash already prepared image** *components/spiffs_image/spiffs_image.img* execute:
 
 `make copyfs`
 
 ---
 
-You can also prepare different SFPIFFS **image** and flash it to ESP32. *This feature is only tested on Linux.*
+You can also prepare different SFPIFFS **image** and flash it to ESP32.
 
 Files to be included on spiffs are already in **components/spiffs_image/image/** directory. You can add or remove the files you want to include.
 

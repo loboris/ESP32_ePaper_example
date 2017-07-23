@@ -640,33 +640,35 @@ void app_main()
 				// ** Show scaled (1/8, 1/4, 1/2 size) JPG images
 					uint8_t old_gs = _gs;
 					_gs = 1;
-					EPD_jpg_image(0, 0, 1, SPIFFS_BASE_PATH"/images/test1.jpg", NULL, 0);
-					EPD_jpg_image(_width/2, 0, 1, SPIFFS_BASE_PATH"/images/test2.jpg", NULL, 0);
-					EPD_jpg_image(0, _height/2, 1, SPIFFS_BASE_PATH"/images/test3.jpg", NULL, 0);
-					EPD_jpg_image(_width/2, _height/2, 1, SPIFFS_BASE_PATH"/images/test4.jpg", NULL, 0);
+					EPD_Cls();
+					EPD_jpg_image(CENTER, CENTER, 0, SPIFFS_BASE_PATH"/images/evolution-of-human.jpg", NULL, 0);
 					EPD_UpdateScreen();
-					EPD_wait(4000);
+					EPD_wait(5000);
 
 					EPD_Cls();
-					EPD_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test2.jpg", NULL, 0);
+					EPD_jpg_image(CENTER, CENTER, 0, SPIFFS_BASE_PATH"/images/people_silhouettes.jpg", NULL, 0);
 					EPD_UpdateScreen();
-					EPD_wait(3000);
+					EPD_wait(5000);
 
 					EPD_Cls();
-					EPD_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test3.jpg", NULL, 0);
+					EPD_jpg_image(CENTER, CENTER, 0, SPIFFS_BASE_PATH"/images/silhouettes-dancing.jpg", NULL, 0);
 					EPD_UpdateScreen();
-					EPD_wait(3000);
+					EPD_wait(5000);
 
 					EPD_Cls();
-					EPD_fillScreen(_bg);
-					EPD_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test4.jpg", NULL, 0);
+					EPD_jpg_image(CENTER, CENTER, 0, SPIFFS_BASE_PATH"/images/girl_silhouettes.jpg", NULL, 0);
 					EPD_UpdateScreen();
-					EPD_wait(3000);
+					EPD_wait(5000);
 
 					EPD_Cls();
-					EPD_fillScreen(_bg);
-					EPD_jpg_image(0, 0, 0, SPIFFS_BASE_PATH"/images/test1.jpg", NULL, 0);
+					EPD_jpg_image(CENTER, CENTER, 0, SPIFFS_BASE_PATH"/images/animal-silhouettes.jpg", NULL, 0);
 					EPD_UpdateScreen();
+					EPD_wait(5000);
+
+					EPD_Cls();
+					EPD_jpg_image(CENTER, CENTER, 0, SPIFFS_BASE_PATH"/images/Flintstones.jpg", NULL, 0);
+					EPD_UpdateScreen();
+					EPD_wait(5000);
 
 					_gs = old_gs;
 			}
