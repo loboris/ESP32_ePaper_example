@@ -2,10 +2,11 @@ menu "ePaper Display DEMO Configuration"
 
 config SPIFFS_BASE_ADDR
     hex "SPIFFS Base address"
-    range 100000 1FFE000
-    default 180000
+    range 0x100000 0x1FFE000
+    default 0x180000
     help
 	Starting address of the SPIFFS area in ESP32 Flash
+	Write the address in hex format, 0x180000
 
 config SPIFFS_SIZE
     int "SPIFFS Size in bytes"

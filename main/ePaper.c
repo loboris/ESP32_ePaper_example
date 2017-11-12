@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include "lwip/err.h"
 #include "apps/sntp/sntp.h"
+#include "nvs_flash.h"
 
 #endif
 
@@ -234,7 +235,9 @@ void app_main()
 
 #ifdef CONFIG_EXAMPLE_USE_WIFI
 
-	EPD_DisplayClearPart();
+    ESP_ERROR_CHECK( nvs_flash_init() );
+
+    EPD_DisplayClearPart();
 	EPD_fillScreen(_bg);
 	EPD_setFont(DEFAULT_FONT, NULL);
 	sprintf(tmp_buff, "Waiting for NTP time...");
