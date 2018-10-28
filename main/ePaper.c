@@ -15,7 +15,7 @@
 #include "esp_system.h"
 #include "driver/gpio.h"
 #include "esp_system.h"
-#include "esp_heap_alloc_caps.h"
+#include "esp_heap_caps.h"
 #include "spiffs_vfs.h"
 #include "esp_log.h"
 
@@ -30,7 +30,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include "lwip/err.h"
-#include "apps/sntp/sntp.h"
+//#include "apps/sntp/sntp.h"
+#include "lwip/apps/sntp.h"
 #include "nvs_flash.h"
 
 #endif
@@ -64,7 +65,7 @@ static EventGroupHandle_t wifi_event_group;
 /* The event group allows multiple bits for each event,
    but we only care about one event - are we connected
    to the AP with an IP? */
-const int CONNECTED_BIT = 0x00000001;
+const int CONNECTED_BIT = BIT0;
 
 //------------------------------------------------------------
 static esp_err_t event_handler(void *ctx, system_event_t *event)
@@ -164,11 +165,11 @@ void app_main()
 
     esp_err_t ret;
 
-	disp_buffer = pvPortMallocCaps(EPD_DISPLAY_WIDTH * (EPD_DISPLAY_HEIGHT/8), MALLOC_CAP_DMA);
+	disp_buffer = heap_caps_malloc(EPD_DISPLAY_WIDTH * (EPD_DISPLAY_HEIGHT/8), MALLOC_CAP_DMA);
 	assert(disp_buffer);
 	drawBuff = disp_buffer;
 
-	gs_disp_buffer = pvPortMallocCaps(EPD_DISPLAY_WIDTH * EPD_DISPLAY_HEIGHT, MALLOC_CAP_DMA);
+	gs_disp_buffer = heap_caps_malloc(EPD_DISPLAY_WIDTH * EPD_DISPLAY_HEIGHT, MALLOC_CAP_DMA);
 	assert(gs_disp_buffer);
 	gs_drawBuff = gs_disp_buffer;
 
@@ -382,9 +383,9 @@ void app_main()
 
 	printf("==== START ====\r\n\n");
 
-	_gs = 1;
+	_gs = 0;
 	uint32_t tstart;
-	int pass = 0, ftype = 9;
+	int pass = 0, ftype = 0;
     while (1) {
     	ftype++;
     	if (ftype > 10) {
