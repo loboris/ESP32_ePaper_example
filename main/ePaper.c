@@ -15,7 +15,7 @@
 #include "esp_system.h"
 #include "driver/gpio.h"
 #include "esp_system.h"
-#include "esp_heap_alloc_caps.h"
+#include "esp_heap_caps.h"
 #include "spiffs_vfs.h"
 #include "esp_log.h"
 
@@ -30,7 +30,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include "lwip/err.h"
-#include "apps/sntp/sntp.h"
+//#include "apps/sntp/sntp.h"
+#include "lwip/apps/sntp.h"
 #include "nvs_flash.h"
 
 #endif
@@ -64,7 +65,7 @@ static EventGroupHandle_t wifi_event_group;
 /* The event group allows multiple bits for each event,
    but we only care about one event - are we connected
    to the AP with an IP? */
-const int CONNECTED_BIT = 0x00000001;
+const int CONNECTED_BIT = BIT0;
 
 //------------------------------------------------------------
 static esp_err_t event_handler(void *ctx, system_event_t *event)
@@ -164,11 +165,11 @@ void app_main()
 
     esp_err_t ret;
 
-	disp_buffer = pvPortMallocCaps(EPD_DISPLAY_WIDTH * (EPD_DISPLAY_HEIGHT/8), MALLOC_CAP_DMA);
+	disp_buffer = heap_caps_malloc(EPD_DISPLAY_WIDTH * (EPD_DISPLAY_HEIGHT/8), MALLOC_CAP_DMA);
 	assert(disp_buffer);
 	drawBuff = disp_buffer;
 
-	gs_disp_buffer = pvPortMallocCaps(EPD_DISPLAY_WIDTH * EPD_DISPLAY_HEIGHT, MALLOC_CAP_DMA);
+	gs_disp_buffer = heap_caps_malloc(EPD_DISPLAY_WIDTH * EPD_DISPLAY_HEIGHT, MALLOC_CAP_DMA);
 	assert(gs_disp_buffer);
 	gs_drawBuff = gs_disp_buffer;
 
@@ -242,8 +243,8 @@ void app_main()
 	EPD_setFont(DEFAULT_FONT, NULL);
 	sprintf(tmp_buff, "Waiting for NTP time...");
 	EPD_print(tmp_buff, CENTER, CENTER);
-	EPD_drawRect(10,10,274,108, EPD_BLACK);
-	EPD_drawRect(12,12,270,104, EPD_BLACK);
+	EPD_drawRect(10,10,EPD_DISPLAY_WIDTH - 22,108, EPD_BLACK);
+	EPD_drawRect(12,12,EPD_DISPLAY_WIDTH - 26,104, EPD_BLACK);
 	EPD_UpdateScreen();
 
 	// ===== Set time zone ======
@@ -382,9 +383,9 @@ void app_main()
 
 	printf("==== START ====\r\n\n");
 
-	_gs = 1;
+	_gs = 0;
 	uint32_t tstart;
-	int pass = 0, ftype = 9;
+	int pass = 0, ftype = 0;
     while (1) {
     	ftype++;
     	if (ftype > 10) {
@@ -406,7 +407,7 @@ void app_main()
 		_fg = 15;
 		_bg = 0;
 
-		EPD_drawRect(1,1,294,126, EPD_BLACK);
+		EPD_drawRect(1,1,EPD_DISPLAY_WIDTH - 2,EPD_DISPLAY_HEIGHT - 2, EPD_BLACK);
 
 		int y = 4;
 		tstart = clock();
@@ -438,7 +439,7 @@ void app_main()
 
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 			EPD_UpdateScreen();
 		}
 		else if (ftype == 2) {
@@ -455,7 +456,7 @@ void app_main()
 			_fg = 15;
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d (rotated 180)", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 			orientation = LANDSCAPE_0;
 			EPD_UpdateScreen();
 		}
@@ -473,7 +474,7 @@ void app_main()
 			_fg = 15;
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d (Fonts from file)", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 			EPD_UpdateScreen();
 		}
 		else if (ftype == 4) {
@@ -515,7 +516,7 @@ void app_main()
 			EPD_print(tmp_buff, 20, 4);
 			font_rotate = 0;
 			sprintf(tmp_buff, "Pass: %d", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 			EPD_UpdateScreen();
 		}
 		else if (ftype == 5) {
@@ -580,7 +581,7 @@ void app_main()
 
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 
 			EPD_UpdateScreen();
 			_gs = old_gs;
@@ -594,7 +595,7 @@ void app_main()
 			_fg = 0;
 			_bg = 1;
 			sprintf(tmp_buff, "Pass: %d", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 
 			EPD_UpdateScreen();
 			_fg = 15;
@@ -621,7 +622,7 @@ void app_main()
 
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d (Gray scale image)", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 
 			EPD_UpdateScreen();
 			_gs = old_gs;

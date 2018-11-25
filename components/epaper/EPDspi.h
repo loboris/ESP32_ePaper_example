@@ -15,8 +15,27 @@
 #include <stdint.h>
 #include "spi_master_lobo.h"
 
-#define EPD_DISPLAY_WIDTH	296
-#define EPD_DISPLAY_HEIGHT	128
+//#define EPD2X9 1
+#define EPD2X13 1
+
+#ifdef EPD2X9
+	#define xDot 128
+	#define yDot 296
+	#define EPD_DISPLAY_WIDTH	296
+	#define EPD_DISPLAY_HEIGHT	128
+    #define EPD_VCOM    0xa8
+	#define DELAYTIME 1500
+#elif EPD2X13
+	#define xDot 122
+	#define yDot 250
+	#define EPD_DISPLAY_WIDTH	250
+	#define EPD_DISPLAY_HEIGHT	120
+    #define EPD_VCOM    0x78
+	#define DELAYTIME 1500
+#endif
+
+//#define EPD_DISPLAY_WIDTH     296
+//#define EPD_DISPLAY_HEIGHT	128
 
 #define SCK_Pin		18
 #define MOSI_Pin	23

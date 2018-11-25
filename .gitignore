@@ -1,4 +1,5 @@
 .config
+.vscode
 *.o
 *.pyc
 *.a
