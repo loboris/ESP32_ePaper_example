@@ -15,7 +15,8 @@
 #include "time.h"
 #include <math.h>
 #include "rom/tjpgd.h"
-#include "esp_heap_alloc_caps.h"
+//#include "esp_heap_alloc_caps.h"
+#include "esp_heap_caps.h"
 #include "EPD.h"
 #include "EPDspi.h"
 #include "rom/tjpgd.h"
@@ -2181,46 +2182,53 @@ static UINT tjd_output (
 
 	uint32_t len = ((dright-dleft+1) * (dbottom-dtop+1));	// calculate length of data
 
-	float gs_clr = 0;
-	uint8_t rgb_color[3];
-	uint8_t last_lvl, i;
+	//float gs_clr = 0;
+	//uint8_t rgb_color[3];
+	//uint8_t last_lvl, i;
 	uint8_t pix;
 	if ((len > 0) && (len <= JPG_IMAGE_LINE_BUF_SIZE)) {
 		for (y = top; y <= bottom; y++) {
 			for (x = left; x <= right; x++) {
 				// Clip to display area
 				if ((x >= dleft) && (y >= dtop) && (x <= dright) && (y <= dbottom)) {
-					// Directly convert color to 4-bit gray scale
-					pix = 0;
-					pix |= ((*src++) >> 4) & 0x08;
-					pix |= ((*src++) >> 5) & 0x06;
-					pix |= ((*src++) >> 7);
-					pix ^= 0x0F;
+					//if(_gs) {
+						// Directly convert color to 4-bit gray scale
+						pix = 0;
+						pix |= ((*src++) >> 4) & 0x08;
+						pix |= ((*src++) >> 5) & 0x06;
+						pix |= ((*src++) >> 7);
+						pix ^= 0x0F;
 
+						/* Convert rgb color to gray scale
+						memcpy(rgb_color, src, 3);
+						src += 3;
+						gs_clr = (GS_FACT_R * rgb_color[0]) + (GS_FACT_G * rgb_color[1]) + (GS_FACT_B * rgb_color[2]);
+						if (gs_clr > 255) gs_clr = 255;
+						// Use only 4 bits & invert
+						//pix = ((uint8_t)gs_clr >> 4) ^ 0x0F;
+						pix = (uint8_t)gs_clr;
 
-					/* Convert rgb color to gray scale
-					memcpy(rgb_color, src, 3);
-					src += 3;
-				    gs_clr = (GS_FACT_R * rgb_color[0]) + (GS_FACT_G * rgb_color[1]) + (GS_FACT_B * rgb_color[2]);
-				    if (gs_clr > 255) gs_clr = 255;
-				    // Use only 4 bits & invert
-				    //pix = ((uint8_t)gs_clr >> 4) ^ 0x0F;
-				    pix = (uint8_t)gs_clr;
+						// Using gray scale lookup table
+						last_lvl = 0;
+						i = 0;
+						for (i=0; i<16; i++) {
+							if ((pix > last_lvl) && (pix <= lvl_buf_jpg[i])) {
+								pix = 15 - i;
+								last_lvl = lvl_buf[i];
+								break;
+							}
+							last_lvl = lvl_buf[i];
+						}
+						*/
+						gs_disp_buffer[(y * EPD_DISPLAY_WIDTH) + x] = pix;
+						gs_used_shades |= (1 << pix);
+					/*} else {
+						pix = 0;
+						pix |= ((*src++) > 0);
+						pix ^= 0x01;
 
-				    // Using gray scale lookup table
-				    last_lvl = 0;
-				    i = 0;
-				    for (i=0; i<16; i++) {
-				    	if ((pix > last_lvl) && (pix <= lvl_buf_jpg[i])) {
-				    		pix = 15 - i;
-					        last_lvl = lvl_buf[i];
-					        break;
-				        }
-				        last_lvl = lvl_buf[i];
-				    }
-					*/
-				    gs_disp_buffer[(y * EPD_DISPLAY_WIDTH) + x] = pix;
-		    		gs_used_shades |= (1 << pix);
+						
+					}*/
 				}
 				else src += 3; // skip
 			}

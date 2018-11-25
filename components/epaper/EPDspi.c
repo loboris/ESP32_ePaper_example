@@ -710,13 +710,24 @@ void EPD_gsUpdate(int xStart, int xEnd, uint8_t yStart, uint8_t yEnd, uint8_t gs
 		uint8_t *_lutPart = LUT_part;
 		memset(LUT_gs+1, 0, 30);
 		if (gs > 0) {
+			#ifdef EPD2X9
 			LUT_gs[1] = 0x18;
 			LUT_gs[21] = gs;
+			#elif EPD2X13
+			LUT_gs[1] = 0x18;
+			LUT_gs[17] = gs;
+			#endif
 		}
 		else {
+			#ifdef EPD2X9
 			LUT_gs[1] = 0x28;
 			LUT_gs[2] = 0x00;
 			LUT_gs[21] = 15;
+			#elif EPD2X13
+			LUT_gs[1] = 0x18;
+			LUT_gs[17] = 0x0F;
+			LUT_gs[18] = 0x01;
+			#endif
 		}
 		LUT_part = LUT_gs;
 		EPD_DisplayPart(xStart, xEnd, yStart, yEnd, drawBuff);

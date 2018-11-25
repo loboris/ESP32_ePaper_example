@@ -243,8 +243,8 @@ void app_main()
 	EPD_setFont(DEFAULT_FONT, NULL);
 	sprintf(tmp_buff, "Waiting for NTP time...");
 	EPD_print(tmp_buff, CENTER, CENTER);
-	EPD_drawRect(10,10,274,108, EPD_BLACK);
-	EPD_drawRect(12,12,270,104, EPD_BLACK);
+	EPD_drawRect(10,10,EPD_DISPLAY_WIDTH - 22,108, EPD_BLACK);
+	EPD_drawRect(12,12,EPD_DISPLAY_WIDTH - 26,104, EPD_BLACK);
 	EPD_UpdateScreen();
 
 	// ===== Set time zone ======
@@ -407,7 +407,7 @@ void app_main()
 		_fg = 15;
 		_bg = 0;
 
-		EPD_drawRect(1,1,294,126, EPD_BLACK);
+		EPD_drawRect(1,1,EPD_DISPLAY_WIDTH - 2,EPD_DISPLAY_HEIGHT - 2, EPD_BLACK);
 
 		int y = 4;
 		tstart = clock();
@@ -439,7 +439,7 @@ void app_main()
 
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 			EPD_UpdateScreen();
 		}
 		else if (ftype == 2) {
@@ -456,7 +456,7 @@ void app_main()
 			_fg = 15;
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d (rotated 180)", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 			orientation = LANDSCAPE_0;
 			EPD_UpdateScreen();
 		}
@@ -474,7 +474,7 @@ void app_main()
 			_fg = 15;
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d (Fonts from file)", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 			EPD_UpdateScreen();
 		}
 		else if (ftype == 4) {
@@ -516,7 +516,7 @@ void app_main()
 			EPD_print(tmp_buff, 20, 4);
 			font_rotate = 0;
 			sprintf(tmp_buff, "Pass: %d", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 			EPD_UpdateScreen();
 		}
 		else if (ftype == 5) {
@@ -581,7 +581,7 @@ void app_main()
 
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 
 			EPD_UpdateScreen();
 			_gs = old_gs;
@@ -595,7 +595,7 @@ void app_main()
 			_fg = 0;
 			_bg = 1;
 			sprintf(tmp_buff, "Pass: %d", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 
 			EPD_UpdateScreen();
 			_fg = 15;
@@ -622,7 +622,7 @@ void app_main()
 
 			EPD_setFont(DEFAULT_FONT, NULL);
 			sprintf(tmp_buff, "Pass: %d (Gray scale image)", pass+1);
-			EPD_print(tmp_buff, 4, 128-EPD_getfontheight()-2);
+			EPD_print(tmp_buff, 4, EPD_DISPLAY_HEIGHT-EPD_getfontheight()-2);
 
 			EPD_UpdateScreen();
 			_gs = old_gs;

@@ -26,10 +26,10 @@
     #define EPD_VCOM    0xa8
 	#define DELAYTIME 1500
 #elif EPD2X13
-	#define xDot 128
+	#define xDot 122
 	#define yDot 250
 	#define EPD_DISPLAY_WIDTH	250
-	#define EPD_DISPLAY_HEIGHT	128
+	#define EPD_DISPLAY_HEIGHT	120
     #define EPD_VCOM    0x78
 	#define DELAYTIME 1500
 #endif
